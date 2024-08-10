@@ -52,13 +52,17 @@ def page_1():
         st.markdown(f"[![image](https://webstatic.mihoyo.com/upload/event/2022/07/29/3a4f0e55bfbb4205346b84ba1a0ecad2_6530919755834738418.png)](https://sr.mihoyo.com/)")
     with col3:
         st.markdown(f"[![image](https://zzz.mihoyo.com/_nuxt/img/绝区零2.004eacc.jpg)](https://zzz.mihoyo.com/main/)")
+    st.write(" ")
+    st.write(" ")
+    st.write(" ")
+    st.markdown("**更多兴趣推荐敬请等待**")
 
 
 def page_2():
     '''工具'''
     tab_photo, tab_music, tab_video = st.tabs(["图片工具", "音频工具", "视频工具"])
     with tab_photo:
-        st.write(":sunglasses:图片换色小程序:sunglasses:")
+        st.write(":sunglasses:图片处理小程序:sunglasses:")
         uploaded_file = st.file_uploader("上传图片", type=['png', 'jpeg', 'jpg'])
         if uploaded_file:
             # 获取图片文件的名称、类型和大小
@@ -66,15 +70,28 @@ def page_2():
             file_type = uploaded_file.type
             file_size = uploaded_file.size
             img = Image.open(uploaded_file)
-            tab1, tab2, tab3, tab4 = st.tabs(["原图", "改色1", "改色2", "改色3"])
-            with tab1:
+            # 显示图片处理界面
+            col1, col2, col3 = st.columns([3, 2, 4])
+            with col1:
                 st.image(img)
-            with tab2:
-                st.image(img_change(img, 0, 2, 1))
-            with tab3:
-                st.image(img_change(img, 1, 2, 0))
-            with tab4:
-                st.image(img_change(img, 1, 0, 2))
+            with col2:
+                ch = st.toggle('反色滤镜')
+                co = st.toggle('增强对比度')
+                bw = st.toggle('黑白滤镜')
+            with col3:
+                st.write('对图片进行反色处理')
+                st.write('让图片颜色更加鲜艳')
+                st.write('将图片变为灰度图')
+            # 点击按钮处理图片
+            b = st.button('开始处理')
+            if b:
+                if ch:
+                    img = img_change_ch(img)
+                if co:
+                    img = img_change_co(img)
+                if bw:
+                    img = img_change_bw(img)
+            st.image(img)
             img.save(file_name)
             with open(file_name, "rb") as file:
                 btn = st.download_button(
@@ -215,7 +232,6 @@ def page_5():
     image_url = "https://i0.hdslb.com/bfs/archive/c8fd97a40bf79f03e7b76cbc87236f612caef7b2.png"
     st.markdown(f"[![image]({image_url})]({url})")
 
-
 def img_change(img, rc, gc, bc):
     '图片处理'
     width, height = img.size
@@ -228,6 +244,52 @@ def img_change(img, rc, gc, bc):
             img_array[x, y] = (r, g, b)
     return img
 
+def img_change_ch(img):
+    '''图片反色滤镜'''
+    width, height = img.size
+    img_array = img.load()
+    for x in range(width):
+        for y in range(height):
+            # 获取RGB值，反色处理
+            r = 255 - img_array[x, y][0]
+            g = 255 - img_array[x, y][1]
+            b = 255 - img_array[x, y][2]
+            img_array[x, y] = (r, g, b)
+    return img
+
+def img_change_co(img):
+    '''增强对比度滤镜'''
+    width, height = img.size
+    img_array = img.load()
+    for x in range(width):
+        for y in range(height):
+            # 获取RGB值
+            r = img_array[x, y][0]
+            g = img_array[x, y][1]
+            b = img_array[x, y][2]
+            # RGB值中，哪个更大，就再大一些
+            if r == max(r, g, b):
+                if r >= 200:
+                    r = 255
+                else:
+                    r += 55
+            elif g == max(r, g, b):
+                if g >= 200:
+                    g = 255
+                else:
+                    g += 55
+            else:
+                if b >= 200:
+                    b = 255
+                else:
+                    b += 55
+            img_array[x, y] = (r, g, b)
+    return img
+
+def img_change_bw(img):
+    '''图片黑白滤镜'''
+    img = img.convert('L') # 转换为灰度图
+    return img
 
 if (page == '兴趣推荐'):
     page_1()
